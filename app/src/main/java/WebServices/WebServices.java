@@ -1,13 +1,21 @@
 package WebServices;
 
-import java.lang.reflect.Array;
+import android.app.Application;
+import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 import Model.Product;
 import Model.ShoppingList;
 import Model.User;
+import Util.Config;
 
-public class WebServices {
+public class WebServices extends Application {
 
     /**
      *
@@ -19,6 +27,27 @@ public class WebServices {
      */
     public User createUser(String firstname, String password, String mail,  String lastname)
     {
+        try
+        {
+            URL url = new URL(Config.BASE_URL + Config.CREATE_USER_URL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(10000 /* milliseconds */);
+            conn.setConnectTimeout(15000 /* milliseconds */);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setDoInput(true);
+            String input = "{\"firstname\": \""+firstname+"\",\"password\": \""+password+"\",\"mail\": \""+mail+"\", \"lastname\": \""+lastname+"\"}";
+            OutputStream os = conn.getOutputStream();
+            os.write(input.getBytes("UTF-8"));
+            os.flush();
+            conn.connect();
+            int response = conn.getResponseCode();
+        }
+        catch (Exception e)
+        {
+            //this.checkCode(8);
+        }
+
         return new User();
     }
 
@@ -132,4 +161,28 @@ public class WebServices {
     {
         return 0;
     }
+
+    /*/**
+     *
+     * @param errorCode code received from request
+     * @return Boolean
+     */
+    /*private boolean checkCode(Integer errorCode)
+    {
+        if(errorCode == 0)
+        {
+            return true;
+        }
+        else
+        {
+            Context context = MyApplication.context;
+            CharSequence text = Config.RETURN_CODES.get(errorCode);
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+
+            return false;
+        }
+    }*/
 }
